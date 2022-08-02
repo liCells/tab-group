@@ -11,7 +11,6 @@ function activate(windowId, index) {
 
 function close(id) {
     id = parseInt(id);
-    console.log(id);
     chrome.tabs.remove(id);
 }
 
@@ -19,14 +18,15 @@ function refreshTabs() {
     getOpenedTabs({ active: false }).then(res => {
         let html = '';
         res.forEach(item => {
-            console.log(item)
             html += buildTabBtn(item);
         });
         document.getElementById('sidenav').innerHTML = html;
         document.getElementsByName('activateBtn').forEach(item => {
+            // 点击事件 激活对应tab
             item.addEventListener("click", function () {
                 activate(item.getAttribute("windowId"), item.getAttribute("index"))
             });
+            // 右击事件 关闭对应tab
             item.oncontextmenu = function () {
                 close(item.id);
                 let parent = item.parentElement;
@@ -52,3 +52,11 @@ function buildTabBtn(data) {
         '</svg>' +
         '</button>'
 }
+
+
+document.addEventListener('visibilitychange', function () {
+    // 用户回到页面时刷新opened-tabs
+    if (document.visibilityState === 'visible') {
+        refreshTabs();
+    }
+})
