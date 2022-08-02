@@ -1,4 +1,5 @@
 init();
+
 function init() {
     refreshTabs();
 }
@@ -44,7 +45,7 @@ async function getOpenedTabs(queryOptions) {
 
 function buildTabBtn(data) {
     return '<button class="opened-tab" name="activateBtn" windowId="' + data.windowId + '" index="' + data.index + '" id="' + data.id + '">' +
-        '<img class="opened-tab-icon" src="' + data.favIconUrl + '"></span>' +
+        '<img class="opened-tab-icon" src="' + (data.favIconUrl == undefined ? '' : data.favIconUrl) + '"></span>' +
         '<span class="opened-tab-title">' + data.title.replace("<", "&lt;").replace(">", "&gt;") + '</span>' +
         '<svg width="34" height="34" viewBox="0 0 74 74" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         '<circle cx="37" cy="37" r="35.5" stroke="black" stroke-width="3"></circle>' +
@@ -62,9 +63,47 @@ function buildCard(data) {
         '</div>';
 }
 
+function buildCardGroup(groups, tabs) {
+    if (groups == null) return '';
+    let html = '';
+    for (let i = 0; i < groups.length; i++) {
+        html += '<div class="card-group">' +
+            '<p class="text-title" contenteditable="true" spellcheck="false">' + groups[0] + '</p>';
+
+        if (tabs != null) {
+            let arr = tabs.groups[0];
+            if (arr != null) {
+                arr.forEach(item => {
+                    html += '<div' + item.url + '>' +
+                        '<div class="card">' +
+                        '<img class="card_load" src="' + (data.favIconUrl == undefined ? '' : data.favIconUrl)
+                    '"><div class="card_load_extreme_title">' +
+                        item.title
+                    '</div>' +
+                        '</div>' +
+                        '</div>';
+                })
+            }
+        }
+        html += '</div>';
+    }
+    return html;
+}
+
 document.addEventListener('visibilitychange', function () {
     // 用户回到页面时刷新opened-tabs
     if (document.visibilityState === 'visible') {
         refreshTabs();
+    }
+})
+
+document.addEventListener('mousedown', function (e) {
+    if (e.button === 1) {
+        let tabGroups = localStorage.getItem("tabGroups");
+        if (tabGroups === null) {
+            tabGroups = ["Tabs Group"];
+            localStorage.setItem("tabGroups", tabGroups);
+            document.getElementById('cards').innerHTML = buildCardGroup(tabGroups);
+        }
     }
 })
