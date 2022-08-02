@@ -1,0 +1,13 @@
+{
+  "name": "Tab Group",
+  "version": "0.0.1",
+  "description": "标签组",
+  "manifest_version": 3,
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "tabs"
+  ]
+}
+
