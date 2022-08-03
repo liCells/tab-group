@@ -98,7 +98,14 @@ document.addEventListener('visibilitychange', function () {
     }
 })
 
-document.oncontextmenu = function () {
+document.oncontextmenu = function (e) {
+    let symbol = e.target.name;
+    if (!symbol) {
+        symbol = e.target.parentNode.name;
+    }
+    if (symbol == 'activateBtn') {
+        return false;
+    }
     let tabGroups = getCardGroupsToMap();
     if (tabGroups === null) {
         tabGroups = new Map();
@@ -164,6 +171,9 @@ function updateCardName(groupId, value) {
 function removeGroup(key) {
     let tabGroups = getCardGroupsToMap();
     tabGroups.delete(key);
+    let tabMap = getTabsToMap();
+    tabMap.delete(key);
+    setTabs(tabMap);
     setCardGroups(tabGroups);
     refreshCardGroups();
 }
