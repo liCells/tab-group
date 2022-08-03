@@ -3,12 +3,18 @@ body {
     margin: 0;
     box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+    display: none;
 }
 
 /* Style the side navigation */
 .sidenav {
     height: 100%;
-    width: 20%;
+    width: 19%;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -32,7 +38,7 @@ body {
 
 /* Style the content */
 .content {
-    margin-left: 20%;
+    margin-left: 18%;
     margin-top: 3px;
     padding-left: 20px;
     min-width: 100%;
@@ -167,8 +173,8 @@ body {
     --orange: #FF9C55;
     --red: #FF5555;
     --violet: #555BFF;
-    height: 700px;
-    width: 87%;
+    height: 600px;
+    width: 85%;
     display: flex;
     flex-direction: column;
     gap: 1em;
@@ -203,6 +209,8 @@ p {
 
 /* From uiverse.io by @alexruix */
 .input-title {
+    margin-left: -5%;
+    max-width: 75%;
     line-height: 32px;
     border: 2px solid transparent;
     border-bottom-color: #777;
@@ -210,7 +218,7 @@ p {
     outline: none;
     background-color: transparent;
     color: #0d0c22;
-    font-size: 25px;
+    font-size: 22px;
     transition: .3s cubic-bezier(0.645, 0.045, 0.355, 1);
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -232,6 +240,66 @@ input-title:hover {
 .input-title:focus::placeholder {
     opacity: 0;
     transition: opacity .3s;
+}
+
+/* From uiverse.io by @hannahyockel */
+.button-delete {
+    cursor: pointer;
+    min-width: 40px;
+    max-width: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1em;
+    border: 0px solid transparent;
+    background-color: rgba(26, 25, 31, 0.08);
+    border-radius: 1.25em;
+    transition: all 0.2s linear;
+}
+
+.button-delete:hover {
+    box-shadow: 3.4px 2.5px 4.9px rgba(0, 0, 0, 0.025),
+        8.6px 6.3px 12.4px rgba(0, 0, 0, 0.035),
+        17.5px 12.8px 25.3px rgba(0, 0, 0, 0.045),
+        36.1px 26.3px 52.2px rgba(0, 0, 0, 0.055),
+        99px 72px 143px rgba(0, 0, 0, 0.08);
+}
+
+.tooltip {
+    margin-left: 15%;
+    margin-top: 4px;
+    position: absolute;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 4em;
+    background-color: rgba(0, 0, 0, 0.253);
+    color: rgb(22, 19, 19);
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent rgba(0, 0, 0, 0.253) transparent transparent;
+}
+
+.tooltip:hover {
+    visibility: visible;
 }
 
 /* main body - end */
