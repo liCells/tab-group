@@ -197,14 +197,41 @@ body {
     grid-template-columns: 20% 20% 20% 20%;
 }
 
-.text-title {
-    max-height: 10%;
-    font-size: 1.4em;
-    font-weight: 700;
-}
-
 p {
     outline: 0px solid transparent;
+}
+
+/* From uiverse.io by @alexruix */
+.input-title {
+    line-height: 32px;
+    border: 2px solid transparent;
+    border-bottom-color: #777;
+    padding: .2rem 0;
+    outline: none;
+    background-color: transparent;
+    color: #0d0c22;
+    font-size: 25px;
+    transition: .3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.input-title:focus,
+input-title:hover {
+    outline: none;
+    padding: .2rem 1rem;
+    border-radius: 1rem;
+    border-color: #7a9cc6;
+}
+
+.input-title::placeholder {
+    color: #777;
+}
+
+.input-title:focus::placeholder {
+    opacity: 0;
+    transition: opacity .3s;
 }
 
 /* main body - end */

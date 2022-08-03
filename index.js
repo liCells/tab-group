@@ -1,7 +1,8 @@
 init();
-
+var tabs;
 function init() {
     refreshTabs();
+    refreshCardGroups();
 }
 
 function activate(windowId, index) {
@@ -17,6 +18,8 @@ function close(id) {
 
 function refreshTabs() {
     getOpenedTabs({ active: false }).then(res => {
+        // id做key 对象本身为val  转为map
+        tabs = new Map(res.map(item => [item.id, item]));
         let html = '';
         res.forEach(item => {
             html += buildTabBtn(item);
@@ -26,6 +29,12 @@ function refreshTabs() {
             // 点击事件 激活对应tab
             item.addEventListener("click", function () {
                 activate(item.getAttribute("windowId"), item.getAttribute("index"))
+            });
+            item.addEventListener("dragstart", function (ev) {
+                dragstart_handler(ev);
+            });
+            item.addEventListener("dragend", function (ev) {
+                dragend_handler(ev);
             });
             // 右击事件 关闭对应tab
             item.oncontextmenu = function () {
@@ -44,7 +53,7 @@ async function getOpenedTabs(queryOptions) {
 }
 
 function buildTabBtn(data) {
-    return '<button class="opened-tab" name="activateBtn" windowId="' + data.windowId + '" index="' + data.index + '" id="' + data.id + '">' +
+    return '<button draggable="true" class="opened-tab" name="activateBtn" windowId="' + data.windowId + '" index="' + data.index + '" id="' + data.id + '">' +
         '<img class="opened-tab-icon" src="' + (data.favIconUrl == undefined ? '' : data.favIconUrl) + '"></span>' +
         '<span class="opened-tab-title">' + data.title.replace("<", "&lt;").replace(">", "&gt;") + '</span>' +
         '<svg width="34" height="34" viewBox="0 0 74 74" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -64,14 +73,14 @@ function buildCard(data) {
 }
 
 function buildCardGroup(groups, tabs) {
-    if (groups == null) return '';
+    if (!groups) return '';
     let html = '';
-    for (let i = 0; i < groups.length; i++) {
-        html += '<div class="card-group">' +
-            '<p class="text-title" contenteditable="true" spellcheck="false">' + groups[0] + '</p>';
+    groups.forEach(function (value, key) {
+        html += '<div class="card-group" name="cardGroup" id="' + key + '">' +
+            '<input placeholder="Group Name" type="text" class="input-title" required="" name="cardName" groupId="' + key + '" value="' + value + '">';
 
         if (tabs != null) {
-            let arr = tabs.groups[0];
+            let arr = tabs.groups[i];
             if (arr != null) {
                 arr.forEach(item => {
                     html += '<div' + item.url + '>' +
@@ -86,7 +95,7 @@ function buildCardGroup(groups, tabs) {
             }
         }
         html += '</div>';
-    }
+    })
     return html;
 }
 
@@ -97,13 +106,92 @@ document.addEventListener('visibilitychange', function () {
     }
 })
 
-document.addEventListener('mousedown', function (e) {
-    if (e.button === 1) {
-        let tabGroups = localStorage.getItem("tabGroups");
-        if (tabGroups === null) {
-            tabGroups = ["Tabs Group"];
-            localStorage.setItem("tabGroups", tabGroups);
-            document.getElementById('cards').innerHTML = buildCardGroup(tabGroups);
-        }
+document.oncontextmenu = function () {
+    let tabGroups = getCardGroups();
+    if (tabGroups === null) {
+        tabGroups = new Map();
+        tabGroups.set("1", "Tabs Group");
+        setCardGroups(tabGroups);
     }
-})
+    refreshCardGroups(tabGroups)
+    // 屏蔽原有事件
+    return false;
+};
+
+function refreshCardGroups(tabGroups) {
+    if (!tabGroups) {
+        tabGroups = getCardGroupsToMap();
+    }
+    document.getElementById('cards').innerHTML = buildCardGroup(tabGroups);
+    let cardGroups = document.getElementsByName('cardGroup');
+    cardGroups.forEach(item => {
+        item.addEventListener("drop", function (ev) {
+            drop_handler(ev)
+        });
+        item.addEventListener("dragover", function (ev) {
+            dragover_handler(ev)
+        });
+    });
+    let cardsNames = document.getElementsByName('cardName');
+    cardsNames.forEach(item => {
+        item.addEventListener("blur", function (e) {
+            updateCardName(e.target.getAttribute('groupId'), e.target.value)
+        });
+    });
+}
+
+function updateCardName(groupId, value) {
+    tabGroups = getCardGroupsToMap();
+    tabGroups.set(groupId, value);
+    setCardGroups(tabGroups);
+}
+
+// drop impl start
+function dragstart_handler(ev) {
+    // 更改源元素的背景颜色以表示已开始拖动
+    ev.currentTarget.style.border = "dashed";
+    // 将拖拽源元素的id添加到拖拽数据有效负载中，以便在触发拖拽事件时可用
+    ev.dataTransfer.setData("text", ev.target.id);
+    // 告诉浏览器可以复制和移动
+    ev.effectAllowed = "copyMove";
+}
+
+function dragend_handler(ev) {
+    // 恢复源边界
+    ev.target.style.border = "solid black";
+    // 删除所有的拖动数据
+    ev.dataTransfer.clearData();
+}
+
+function dragover_handler(ev) {
+    // 更改目标元素的边框以表示发生了拖移事件
+    // ev.currentTarget.style.background = "lightblue";
+    ev.preventDefault();
+}
+
+function drop_handler(ev) {
+    ev.preventDefault();
+    // 获取拖动源元素的id(由dragstart事件处理程序添加到拖动数据有效负载中)
+    let id = ev.dataTransfer.getData("text");
+    let cardGroups = getCardGroupsToMap();
+    if (cardGroups.has(ev.target.id)) {
+        let nodeCopy = document.getElementById(id).cloneNode(true);
+        nodeCopy.id = "newId";
+        ev.target.appendChild(nodeCopy);
+    }
+}
+// drop impl end
+
+// local storage start
+function getCardGroups() {
+    return localStorage.getItem("tabGroups");    
+}
+
+function getCardGroupsToMap() {
+    return new Map(JSON.parse(getCardGroups()));
+}
+
+function setCardGroups(data) {
+    localStorage.setItem("tabGroups", JSON.stringify([...data]));
+}
+// local storage end
