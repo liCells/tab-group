@@ -64,7 +64,7 @@ function buildTabBtn(data) {
 }
 
 function buildCard(data) {
-    return '<a href="' + data.url + '"><div class="card">' +
+    return '<a href="' + data.url + '" name="savedTab" value="' + data.id + '"><div class="card">' +
         '<img class="card_load" src="' + data.favIconUrl + '">' +
         '<div class="card_load_extreme_title">' +
         data.title.replace("<", "&lt;").replace(">", "&gt;") +
@@ -102,8 +102,13 @@ document.oncontextmenu = function (e) {
     let symbol = e.target.name;
     if (!symbol) {
         symbol = e.target.parentNode.name;
+        if (!symbol) {
+            if (e.target.parentNode.parentNode != null) {
+                symbol = e.target.parentNode.parentNode.name;
+            }
+        }
     }
-    if (symbol == 'activateBtn') {
+    if (symbol == 'activateBtn' || symbol == 'savedTab') {
         return false;
     }
     let tabGroups = getCardGroupsToMap();
@@ -128,6 +133,7 @@ function refreshCardGroups(tabGroups) {
     if (!tabGroups) {
         tabGroups = getCardGroupsToMap();
     }
+    
     document.getElementById('cards').innerHTML = buildCardGroup(tabGroups);
     let cardGroups = document.getElementsByName('cardGroup');
     cardGroups.forEach(item => {
@@ -138,17 +144,30 @@ function refreshCardGroups(tabGroups) {
             dragover_handler(ev)
         });
     });
+    
     let cardsNames = document.getElementsByName('cardName');
     cardsNames.forEach(item => {
         item.addEventListener("blur", function (e) {
             updateCardName(e.target.getAttribute('groupId'), e.target.value)
         });
     });
+
     let groupDelBtns = document.getElementsByName('groupDel');
     groupDelBtns.forEach(item => {
         item.addEventListener("click", function (e) {
             removeGroup(e.target.getAttribute('value'))
         });
+    });
+
+    let savedTabs = document.getElementsByName('savedTab');
+    savedTabs.forEach(item => {
+        item.oncontextmenu = function () {
+            removeTab(item.getAttribute('value'));
+            let parent = item.parentElement;
+            parent.removeChild(item);
+            // 屏蔽原有事件
+            return false;
+        };
     });
 }
 
@@ -166,6 +185,22 @@ function removeGroup(key) {
     setTabs(tabMap);
     setCardGroups(tabGroups);
     refreshCardGroups();
+}
+
+function removeTab(id) {
+    let tabMap = getTabsToMap();
+    out:
+    for (let tabArr of [...tabMap.values()]) {
+        if (tabArr) {
+            for (let i = 0; i < tabArr.length; i++) {
+                if (id == tabArr[i].id) {
+                    tabArr.splice(i, 1);
+                    break out;
+                }
+            }
+        }
+    }
+    setTabs(tabMap);
 }
 
 // drop impl start
@@ -203,10 +238,11 @@ function drop_handler(ev) {
         ev.target.appendChild(htmlToElement(html));
         let tabMap = getTabsToMap();
         let tabArr = tabMap.get(ev.target.id);
+        let obj = {url: tab.url, title: tab.title, favIconUrl: tab.favIconUrl, id: Math.ceil(Math.random() * 1000)};
         if (tabArr) {
-            tabArr.push({url: tab.url, title: tab.title, favIconUrl: tab.favIconUrl});
+            tabArr.push(obj);
         } else {
-            tabArr = [{url: tab.url, title: tab.title, favIconUrl: tab.favIconUrl}];
+            tabArr = [obj];
         }
         tabMap.set(ev.target.id, tabArr);
         setTabs(tabMap);
