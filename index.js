@@ -64,12 +64,12 @@ function buildTabBtn(data) {
 }
 
 function buildCard(data) {
-    return '<div class="card" name="savedTab" url="' + data.url + '">' +
+    return '<a href="' + data.url + '"><div class="card">' +
         '<img class="card_load" src="' + data.favIconUrl + '">' +
         '<div class="card_load_extreme_title">' +
         data.title.replace("<", "&lt;").replace(">", "&gt;") +
         '</div>' +
-        '</div>';
+        '</div></a>';
 }
 
 function buildCardGroup(groups, tabs) {
@@ -148,16 +148,6 @@ function refreshCardGroups(tabGroups) {
     groupDelBtns.forEach(item => {
         item.addEventListener("click", function (e) {
             removeGroup(e.target.getAttribute('value'))
-        });
-    });
-    let savedTabs = document.getElementsByName('savedTab');
-    savedTabs.forEach(item => {
-        item.addEventListener("click", function (e) {
-            let url = e.target.getAttribute('url');
-            if (!url) {
-                url = e.target.parentNode.getAttribute('url');
-            }
-            window.location.replace(url);
         });
     });
 }
