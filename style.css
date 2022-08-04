@@ -209,8 +209,8 @@ p {
 
 /* From uiverse.io by @alexruix */
 .input-title {
-    margin-left: -5%;
-    max-width: 83%;
+    margin-left: 0%;
+    max-width: 80%;
     line-height: 32px;
     border: 2px solid transparent;
     border-bottom-color: #777;
